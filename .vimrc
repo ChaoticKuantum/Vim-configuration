@@ -2,6 +2,8 @@
 "  DISPLAY / UI{{{
 "
 "---------------------------------------------------------------------------
+" The font used is atom's one: 
+" https://github.com/abertsch/Menlo-for-Powerline
 
 " Show syntax highlight
 syntax on
@@ -15,8 +17,9 @@ set wildmenu
  set foldmethod=syntax
  set foldlevel=99
 
-"specify different areas of the screen where the splits should occur
+"always splits to the right and below
 set splitright
+set splitbelow
 
 " Replace tabs with spaces
 set expandtab
@@ -54,6 +57,10 @@ set list
 
 " Setting up how to display whitespace characters
 set listchars=tab:⇥\ ,trail:·,extends:⋯,precedes:⋯,nbsp:~
+" listchar=trail is not as flexible, use the below to highlight trailing
+" whitespace
+ highlight ExtraWhitespace ctermbg=red guibg=red
+ match ExtraWhitespace /\s\+$/
 
 " Numbers of rows to keep to the left and to the right off the screen
 set scrolloff=5
@@ -97,19 +104,18 @@ Plugin 'vim-airline/vim-airline-themes'
 Plugin 'octol/vim-cpp-enhanced-highlight'
 Plugin 'scrooloose/syntastic'
 Plugin 'scrooloose/nerdcommenter'
-Plugin 'terryma/vim-multiple-cursors'
 Plugin 'scrooloose/nerdtree'
+Plugin 'terryma/vim-multiple-cursors'
 Plugin 'matze/vim-move'
-Plugin 'kien/ctrlp.vim'
 Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-fugitive'
+Plugin 'tpope/vim-repeat'
 Plugin 'shougo/unite.vim'
 Plugin 'majutsushi/tagbar'
-Plugin 'tpope/vim-fugitive'
 Plugin 'hdima/python-syntax'
 Plugin 'rking/ag.vim'
 Plugin 'mhinz/vim-signify'
 Plugin 'tmhedberg/simpylfold'
-Plugin 'tpope/vim-repeat'
 Plugin 'c.vim'
 Plugin 'valloric/youcompleteme'
 Plugin 'nvie/vim-flake8' 
@@ -117,6 +123,8 @@ Plugin 'sirver/ultisnips'
 Plugin 'honza/vim-snippets'
 Plugin 'vim-scripts/a.vim'
 Plugin 'vim-scripts/indentpython.vim'
+Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plugin 'junegunn/fzf.vim'
 call vundle#end()            " required
 
 "Activation of the filetype detection for VIM version > 7.3.430 
@@ -163,12 +171,17 @@ set showmatch
 "
 "---------------------------------------------------------------------------
 
-"vim-cpp-enhanced-highlight
+"===============================================================================
+" Vim-cpp-enhanced-highlight
+"===============================================================================
 let g:cpp_class_scope_highlight = 1
 let g:cpp_experimental_template_highlight = 1
 
-"syntastic
-  "General
+"===============================================================================
+" Syntastic
+"===============================================================================
+
+"General
     set statusline+=%#warningmsg#
     set statusline+=%{SyntasticStatuslineFlag()}
     set statusline+=%*
@@ -192,7 +205,9 @@ let g:cpp_experimental_template_highlight = 1
     "Fortran
     let g:syntastic_fortran_compiler_options ='-std=f90'
 
-"airline
+"===============================================================================
+" Airline
+"===============================================================================
   " Enable the list of buffers
     let g:airline#extensions#tabline#enabled = 1
   " Show just the filename
@@ -200,17 +215,23 @@ let g:cpp_experimental_template_highlight = 1
   " Use powerline fonts
     let g:airline_powerline_fonts = 1
 
-"multicursor
+"===============================================================================
+" Multicursor 
+"===============================================================================
 let g:multicursor_insert_maps = 1
 let g:multicursor_normal_maps = 1
 
-"vim-move
+"===============================================================================
+" Vim-move
+"===============================================================================
 let g:move_key_modifier = 'C'
 
 "python-syntax
 let python_highlight_all = 1
 
-"signify 
+"===============================================================================
+" Signify
+"===============================================================================
 let g:signify_vcs_list              = ['git']
 let g:signify_sign_add               = '+'
 let g:signify_sign_delete            = '_'
@@ -218,6 +239,41 @@ let g:signify_sign_delete_first_line = '‾'
 let g:signify_sign_change            = '!'
 let g:signify_sign_changedelete      = g:signify_sign_change
 let g:signify_sign_show_count = 1
+
+"===============================================================================
+" NERDCommenter
+"===============================================================================
+" Always leave a space between the comment character and the comment
+let NERDSpaceDelims=1
+
+"===============================================================================
+" UltiSnips
+"===============================================================================
+
+" Make UltiSnips works nicely with YCM
+ function! g:UltiSnips_Complete()
+   call UltiSnips#ExpandSnippet()
+   if g:ulti_expand_res == 0
+       if pumvisible()
+           return "\<C-n>"
+       else
+           call UltiSnips#JumpForwards()
+           if g:ulti_jump_forwards_res == 0
+               return "\<TAB>"
+            endif
+       endif
+   endif
+return ""
+endfunction
+
+au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsListSnippets="<c-e>"
+" this mapping Enter key to <C-y> to chose the current highlight item 
+"  and close the selection list, same as other IDEs.
+"  CONFLICT with some plugins like tpope/Endwise
+ inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
 
 " }}}
 "---------------------------------------------------------------------------
@@ -262,6 +318,35 @@ vmap <F2> <esc>:w<CR>gv
 
 "Set paste mode to F3
 set pastetoggle=<F3>
+
+
+"===============================================================================
+" Visual Mode Key Mappings
+"===============================================================================
+
+" Enter: Highlight visual selections
+ xnoremap <silent> <CR> y:let @/ = @"<cr>:set hlsearch<cr>
+
+" Backspace: Delete selected and go into insert mode
+xnoremap <bs> c
+
+" <|>: Reselect visual block after indent
+ xnoremap < <gv
+ xnoremap > >gv
+
+" Ctrl-r: Easier search and replace
+ vnoremap <c-r> "hy:%s/<c-r>h//gc<left><left><left>
+
+"===============================================================================
+" Normal Mode Shift Key Mappings
+"===============================================================================
+
+" _ : Quick horizontal splits
+ nnoremap _ :sp<cr>
+
+" | : Quick vertical splits
+ nnoremap <bar> :vsp<cr>
+
 "}}}
 "--------------------------------------------------------------------------
 "   FILE TYPES{{{
@@ -301,6 +386,5 @@ endif
 if has("autocmd")
           au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
-
 
 " }}}
