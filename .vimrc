@@ -2,7 +2,7 @@
 "  DISPLAY / UI{{{
 "
 "---------------------------------------------------------------------------
-" The font used is atom's one: 
+" The font used is Atom's one: 
 " https://github.com/abertsch/Menlo-for-Powerline
 
 " Show syntax highlight
@@ -193,17 +193,17 @@ let g:cpp_experimental_template_highlight = 1
     let g:airline#extensions#syntastic#enabled = 1
     let g:syntastic_enable_signs=1
 
-    "C++
+"C++
     let g:syntastic_cpp_compiler = 'clang++'
     let g:syntastic_cpp_compiler_options = ' -std=c++11  -stdlib=libc++'
     let g:syntastic_cpp_check_header = 1
     let g:syntastic_cpp_remove_include_errors = 1
 
-    "Python
+"Python
     let g:syntastic_python_pylint_quiet_messages= { 'level' : 'warnings' }
     "let g:syntastic_python_checkers = "['pylint']
 
-    "Fortran
+"Fortran
     let g:syntastic_fortran_compiler_options ='-std=f90'
 
 "===============================================================================
@@ -227,7 +227,9 @@ let g:multicursor_normal_maps = 1
 "===============================================================================
 let g:move_key_modifier = 'C'
 
-"python-syntax
+"===============================================================================
+" python-syntax
+"===============================================================================
 let python_highlight_all = 1
 
 "===============================================================================
@@ -280,6 +282,12 @@ let g:UltiSnipsListSnippets="<c-e>"
 "===============================================================================
 let g:ycm_global_ycm_extra_conf = '/home/jp/.vim/bundle/youcompleteme/third_party/ycmd/cpp/ycm'
 
+"===============================================================================
+" Unite
+"===============================================================================
+
+
+
 " }}}
 "---------------------------------------------------------------------------
 "  COLORS / THEME{{{
@@ -294,9 +302,16 @@ colorscheme onedark
 "  Mappings{{{
 "
 "---------------------------------------------------------------------------
+"===============================================================================
+" Key leader Mappings
+"===============================================================================
 
 " Key leader
 :let mapleader = ","
+
+"===============================================================================
+" Normal Mode Key Mappings
+"===============================================================================
 
 " Map <C-L> (redraw screen) to also turn off search highlighting until the
 " next search
@@ -313,10 +328,17 @@ noremap <C-Z> :update<CR>
 vnoremap <C-Z> <C-C>:update<CR>
 inoremap <C-Z> <C-O>:update<CR>
 
+" | : Quick vertical splits
+nnoremap <bar> :vsp<cr>
+
+"===============================================================================
+" "F" Key Mappings
+"===============================================================================
+
 "Set paste mode to F3
 set pastetoggle=<F3>
 
-" maps Tagbar to F9
+" maps Tagbar to F8
 map <silent> <F8> :TagbarToggle<CR>
 map! <silent> <F8> <ESC>:TagbarToggle<CR>
 
@@ -348,8 +370,6 @@ xnoremap <bs> c
 " _ : Quick horizontal splits
  nnoremap _ :sp<cr>
 
-" | : Quick vertical splits
- nnoremap <bar> :vsp<cr>
 
 "}}}
 "--------------------------------------------------------------------------
@@ -363,12 +383,7 @@ augroup filetype_vim
 
 augroup filetype_py
     autocmd!
-    autocmd BufNewFile,BufRead *.py setlocal tabstop=4
-    autocmd BufNewFile,BufRead *.py setlocal softtabstop=4
-    autocmd BufNewFile,BufRead *.py setlocal shiftwidth=4
     autocmd BufNewFile,BufRead *.py setlocal textwidth=79
-    autocmd BufNewFile,BufRead *.py setlocal expandtab
-    autocmd BufNewFile,BufRead *.py setlocal autoindent
     autocmd BufNewFile,BufRead *.py setlocal fileformat=unix
     autocmd BufNewFile,BufRead *.py setlocal colorcolumn=80
 augroup END
