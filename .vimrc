@@ -125,6 +125,7 @@ Plugin 'vim-scripts/a.vim'
 Plugin 'vim-scripts/indentpython.vim'
 Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plugin 'junegunn/fzf.vim'
+Plugin 'sjl/gundo.vim'
 call vundle#end()            " required
 
 "Activation of the filetype detection for VIM version > 7.3.430 
@@ -195,8 +196,8 @@ let g:cpp_experimental_template_highlight = 1
     "C++
     let g:syntastic_cpp_compiler = 'clang++'
     let g:syntastic_cpp_compiler_options = ' -std=c++11  -stdlib=libc++'
-    "let g:syntastic_cpp_check_header = 1
-    "let g:syntastic_cpp_remove_include_errors = 1
+    let g:syntastic_cpp_check_header = 1
+    let g:syntastic_cpp_remove_include_errors = 1
 
     "Python
     let g:syntastic_python_pylint_quiet_messages= { 'level' : 'warnings' }
@@ -274,6 +275,10 @@ let g:UltiSnipsListSnippets="<c-e>"
 "  CONFLICT with some plugins like tpope/Endwise
  inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
+"===============================================================================
+" YouCompleteMe
+"===============================================================================
+let g:ycm_global_ycm_extra_conf = '/home/jp/.vim/bundle/youcompleteme/third_party/ycmd/cpp/ycm'
 
 " }}}
 "---------------------------------------------------------------------------
@@ -293,14 +298,6 @@ colorscheme onedark
 " Key leader
 :let mapleader = ","
 
-" maps Tagbar to F9
- map <silent> <F9> :TagbarToggle<CR>
- map! <silent> <F9> <ESC>:TagbarToggle<CR>
-
-" maps NERDTree to F10
-map <silent> <F10> :NERDTreeToggle<CR>
-map! <silent> <F10> <ESC>:NERDTreeToggle<CR>
-
 " Map <C-L> (redraw screen) to also turn off search highlighting until the
 " next search
 nnoremap <C-L> :nohl<CR><C-L>
@@ -312,13 +309,20 @@ nnoremap <silent> <cr> :nohlsearch<cr><cr>
 nnoremap <space> za
 
 " Use quick saving, also in Insert mode
-nnoremap <F2> :w<cr>
-inoremap <F2> <C-c>:w<cr>
-vmap <F2> <esc>:w<CR>gv
+noremap <C-Z> :update<CR>
+vnoremap <C-Z> <C-C>:update<CR>
+inoremap <C-Z> <C-O>:update<CR>
 
 "Set paste mode to F3
 set pastetoggle=<F3>
 
+" maps Tagbar to F9
+map <silent> <F8> :TagbarToggle<CR>
+map! <silent> <F8> <ESC>:TagbarToggle<CR>
+
+" maps NERDTree to F10
+map <silent> <F10> :NERDTreeToggle<CR>
+map! <silent> <F10> <ESC>:NERDTreeToggle<CR>
 
 "===============================================================================
 " Visual Mode Key Mappings
