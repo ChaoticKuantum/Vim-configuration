@@ -111,6 +111,7 @@ Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-repeat'
 Plugin 'shougo/unite.vim'
+Plugin 'shougo/vimproc.vim'
 Plugin 'majutsushi/tagbar'
 Plugin 'hdima/python-syntax'
 Plugin 'rking/ag.vim'
@@ -126,6 +127,7 @@ Plugin 'vim-scripts/indentpython.vim'
 Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plugin 'junegunn/fzf.vim'
 Plugin 'sjl/gundo.vim'
+Plugin 'raimondi/delimitmate'
 call vundle#end()            " required
 
 "Activation of the filetype detection for VIM version > 7.3.430 
@@ -250,34 +252,6 @@ let g:signify_sign_show_count = 1
 let NERDSpaceDelims=1
 
 "===============================================================================
-" UltiSnips
-"===============================================================================
-
-" Make UltiSnips works nicely with YCM
- function! g:UltiSnips_Complete()
-   call UltiSnips#ExpandSnippet()
-   if g:ulti_expand_res == 0
-       if pumvisible()
-           return "\<C-n>"
-       else
-           call UltiSnips#JumpForwards()
-           if g:ulti_jump_forwards_res == 0
-               return "\<TAB>"
-            endif
-       endif
-   endif
-return ""
-endfunction
-
-au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsListSnippets="<c-e>"
-" this mapping Enter key to <C-y> to chose the current highlight item 
-"  and close the selection list, same as other IDEs.
-"  CONFLICT with some plugins like tpope/Endwise
- inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
-"===============================================================================
 " YouCompleteMe
 "===============================================================================
 let g:ycm_global_ycm_extra_conf = '/home/jp/.vim/bundle/youcompleteme/third_party/ycmd/cpp/ycm'
@@ -285,8 +259,95 @@ let g:ycm_global_ycm_extra_conf = '/home/jp/.vim/bundle/youcompleteme/third_part
 "===============================================================================
 " Unite
 "===============================================================================
+" The prefix key.
+nnoremap    [unite]   <Nop>
+"nmap    <leader>r [unite]
+" A simple mapping that will configure <leader>-f to browse for a file in the
+" current working directory(start-insert = type to match):
+nnoremap <leader>f :<C-u>Unite -start-insert file<CR>
+
+" The popular recursive file search, starting insert automatically and using
+" fuzzy file matching:
+call unite#filters#matcher_default#use(['matcher_fuzzy'])
+nnoremap <leader>r :<C-u>Unite -start-insert file_rec<CR>
+" With large projects use:
+" nnoremap <leader>r :<C-u>Unite -start-insert file_rec/async:!<CR>
+
+" Since you can pass in multiple sources into unite you can easily create a
+" mapping that will open up a unite pane with the sources you frequently use.
+" To see buffers, recent files then bookmarks:
+nnoremap <silent> <leader>b :<C-u>Unite buffer bookmark<CR>
+
+call unite#filters#matcher_default#use(['matcher_fuzzy'])
+nnoremap <leader>t :<C-u>Unite -no-split -buffer-name=files   -start-insert file_rec/async:!<cr>
+nnoremap <leader>f :<C-u>Unite -no-split -buffer-name=files   -start-insert file<cr>
+nnoremap <leader>r :<C-u>Unite -no-split -buffer-name=mru     -start-insert file_mru<cr>
+nnoremap <leader>o :<C-u>Unite -no-split -buffer-name=outline -start-insert outline<cr>
+nnoremap <leader>y :<C-u>Unite -no-split -buffer-name=yank    history/yank<cr>
+nnoremap <leader>e :<C-u>Unite -no-split -buffer-name=buffer  buffer<cr>
 
 
+" The prefix key
+" nmap    f [unite]
+
+" nnoremap <silent> [unite]c  :<C-u>UniteWithCurrentDir
+        " \ -buffer-name=files buffer bookmark file<CR>
+" nnoremap <silent> [unite]b  :<C-u>UniteWithBufferDir
+        " \ -buffer-name=files buffer bookmark file<CR>
+" nnoremap <silent> [unite]r  :<C-u>Unite
+        " \ -buffer-name=register register<CR>
+" nnoremap <silent> [unite]o  :<C-u>Unite outline<CR>
+" nnoremap <silent> [unite]f
+        " \ :<C-u>Unite -buffer-name=resume resume<CR>
+" nnoremap <silent> [unite]ma
+        " \ :<C-u>Unite mapping<CR>
+" nnoremap <silent> [unite]me
+        " \ :<C-u>Unite output:message<CR>
+" nnoremap  [unite]f  :<C-u>Unite source<CR>
+
+" For ack.
+if executable('ack-grep')
+  let g:unite_source_grep_command = 'ack-grep'
+  let g:unite_source_grep_default_opts = '-i --no-heading --no-color -a -H'
+  let g:unite_source_grep_recursive_opt = ''
+elseif executable('ack')
+  let g:unite_source_grep_command = 'ack'
+  let g:unite_source_grep_default_opts = '-i --no-heading --no-color -a -H'
+  let g:unite_source_grep_recursive_opt = ''
+elseif executable('ag')
+  let g:unite_source_grep_command = 'ag'
+  let g:unite_source_grep_default_opts =
+        \ '-i --vimgrep --hidden --ignore ' .
+        \ '''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
+  let g:unite_source_grep_recursive_opt = ''
+endif
+
+let g:unite_source_rec_max_cache_files = 99999
+
+"===============================================================================
+" UltiSnips
+"===============================================================================
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+
+" Make UltiSnips works nicely with YCM
+function! g:UltiSnips_Complete()
+  call UltiSnips#ExpandSnippet()
+  if g:ulti_expand_res == 0
+    if pumvisible()
+      return "\<C-n>"
+    else
+      call UltiSnips#JumpForwards()
+      if g:ulti_jump_forwards_res == 0
+        return "\<TAB>"
+      endif
+    endif
+  endif
+  return ""
+endfunction
+
+au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
 
 " }}}
 "---------------------------------------------------------------------------
@@ -331,12 +392,30 @@ inoremap <C-Z> <C-O>:update<CR>
 " | : Quick vertical splits
 nnoremap <bar> :vsp<cr>
 
+" Ctrl-f: fzf
+nnoremap <c-f> :Ag
+
+"Quick switch tab
+nnoremap <C-left> :bprev<CR>
+nnoremap <C-right> :bnext<CR>
+
+" Ctrl-p: Recent files
+nnoremap <c-p> :History<CR>
+
+"Allows moving through wrapped lines effectively
+:nnoremap k gk
+:nnoremap j gj
+
+
 "===============================================================================
 " "F" Key Mappings
 "===============================================================================
 
 "Set paste mode to F3
 set pastetoggle=<F3>
+
+" Switch buffers with menu
+:nnoremap <F5> :buffers<CR>:buffer<Space>
 
 " maps Tagbar to F8
 map <silent> <F8> :TagbarToggle<CR>
@@ -351,17 +430,26 @@ map! <silent> <F10> <ESC>:NERDTreeToggle<CR>
 "===============================================================================
 
 " Enter: Highlight visual selections
- xnoremap <silent> <CR> y:let @/ = @"<cr>:set hlsearch<cr>
+xnoremap <silent> <CR> y:let @/ = @"<cr>:set hlsearch<cr>
 
 " Backspace: Delete selected and go into insert mode
 xnoremap <bs> c
 
 " <|>: Reselect visual block after indent
- xnoremap < <gv
- xnoremap > >gv
+xnoremap < <gv
+xnoremap > >gv
 
 " Ctrl-r: Easier search and replace
- vnoremap <c-r> "hy:%s/<c-r>h//gc<left><left><left>
+vnoremap <c-r> "hy:%s/<c-r>h//gc<left><left><left>
+
+" Ctrl-s: Easier substitue
+vnoremap <c-s> :s/\%V//g<left><left><left>
+
+" Ctrl-f: Find highlight word with FZF
+vnoremap <c-f> "hy:Ag <c-r>h<cr>
+
+" \: Toggle comment
+xmap \ <Leader>c<space>
 
 "===============================================================================
 " Normal Mode Shift Key Mappings
@@ -386,8 +474,15 @@ augroup filetype_py
     autocmd BufNewFile,BufRead *.py setlocal textwidth=79
     autocmd BufNewFile,BufRead *.py setlocal fileformat=unix
     autocmd BufNewFile,BufRead *.py setlocal colorcolumn=80
+    autocmd FileType python setlocal foldmethod=indent
 augroup END
 
+augroup filetype_f90
+    autocmd!
+    autocmd BufNewFile,BufRead *.py setlocal textwidth=129
+    autocmd BufNewFile,BufRead *.py setlocal fileformat=unix
+    autocmd BufNewFile,BufRead *.py setlocal colorcolumn=130
+augroup END
 "}}}
 "--------------------------------------------------------------------------
 "  FUNCTIONS{{{
