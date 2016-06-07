@@ -395,7 +395,7 @@ nnoremap <bar> :vsp<cr>
 " Ctrl-f: fzf
 nnoremap <c-f> :Ag
 
-"Quick switch tab
+"Quick switch buffer
 nnoremap <C-left> :bprev<CR>
 nnoremap <C-right> :bnext<CR>
 
