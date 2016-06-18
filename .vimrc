@@ -2,16 +2,21 @@
 "  DISPLAY / UI{{{
 "
 "---------------------------------------------------------------------------
-" The font used is Atom's one: 
+" The font used is Atom's one:
 " https://github.com/abertsch/Menlo-for-Powerline
 
 " Show syntax highlight
 syntax on
 
+set nohidden
 set laststatus=2
 
 " visual autocomplete for command menu
 set wildmenu
+set wildmode=longest,list,full
+set wildignore+=*.png,*.jpg,*.gif
+set wildignore+=*.so,*.swp,*.zip,*/.Trash/**,*.pdf,*.dmg,*/Library/**,*/.rbenv/**
+set wildignore+=*/.nx/**,*.app
 
 " Enable folding
  set foldmethod=syntax
@@ -98,9 +103,10 @@ call vundle#begin()
 
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'joshdick/onedark.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+Plugin 'joshdick/onedark.vim'
+Plugin 'joshdick/airline-onedark.vim'
 Plugin 'octol/vim-cpp-enhanced-highlight'
 Plugin 'scrooloose/syntastic'
 Plugin 'scrooloose/nerdcommenter'
@@ -119,7 +125,7 @@ Plugin 'mhinz/vim-signify'
 Plugin 'tmhedberg/simpylfold'
 Plugin 'c.vim'
 Plugin 'valloric/youcompleteme'
-Plugin 'nvie/vim-flake8' 
+Plugin 'nvie/vim-flake8'
 Plugin 'sirver/ultisnips'
 Plugin 'honza/vim-snippets'
 Plugin 'vim-scripts/a.vim'
@@ -128,9 +134,11 @@ Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plugin 'junegunn/fzf.vim'
 Plugin 'sjl/gundo.vim'
 Plugin 'raimondi/delimitmate'
+Plugin 'ConradIrwin/vim-bracketed-paste'
+
 call vundle#end()            " required
 
-"Activation of the filetype detection for VIM version > 7.3.430 
+"Activation of the filetype detection for VIM version > 7.3.430
 filetype on                  " required
 
 "}}}
@@ -146,7 +154,7 @@ set autoindent
 
 "}}}
 "---------------------------------------------------------------------------
-"  SEARCH / HIGHLIGHT{{{ 
+"  SEARCH / HIGHLIGHT{{{
 "
 "---------------------------------------------------------------------------
 
@@ -159,7 +167,7 @@ set hlsearch
 " Ignore case in search patterns
 set ignorecase
 
-" Override the 'ignorecase' option if the search patter ncontains upper case characters
+" Override the 'ignorecase' option if the search pattern contains upper case characters
 set smartcase
 
 " Live search. While typing a search command, show where the pattern
@@ -181,6 +189,11 @@ let g:cpp_class_scope_highlight = 1
 let g:cpp_experimental_template_highlight = 1
 
 "===============================================================================
+" Tagbar
+"===============================================================================
+let g:tagbar_autofocus=1
+
+"===============================================================================
 " Syntastic
 "===============================================================================
 
@@ -197,6 +210,7 @@ let g:cpp_experimental_template_highlight = 1
 
 "C++
     let g:syntastic_cpp_compiler = 'clang++'
+    let g:syntastic_cpp_checkers = ['clang++']
     let g:syntastic_cpp_compiler_options = ' -std=c++11  -stdlib=libc++'
     let g:syntastic_cpp_check_header = 1
     let g:syntastic_cpp_remove_include_errors = 1
@@ -215,11 +229,14 @@ let g:cpp_experimental_template_highlight = 1
     let g:airline#extensions#tabline#enabled = 1
   " Show just the filename
     let g:airline#extensions#tabline#fnamemod = ':t'
+    let g:airline#extensions#bufferline#enabled = 1
   " Use powerline fonts
+    let g:airline#extensions#syntastic#enabled = 1
     let g:airline_powerline_fonts = 1
-
+    let g:airline_theme='onedark'
+    let g:airline_section_c = airline#section#create_left(['%{getcwd()}', 'file'])
 "===============================================================================
-" Multicursor 
+" Multicursor
 "===============================================================================
 let g:multicursor_insert_maps = 1
 let g:multicursor_normal_maps = 1
@@ -244,6 +261,14 @@ let g:signify_sign_delete_first_line = '‾'
 let g:signify_sign_change            = '!'
 let g:signify_sign_changedelete      = g:signify_sign_change
 let g:signify_sign_show_count = 1
+
+"===============================================================================
+" NERDTree
+"===============================================================================
+
+let NERDTreeShowBookmarks=1
+let NERDTreeShowHidden=1
+let NERDTreeIgnore=['\~$', '\.swp$', '\.git', '\.hg', '\.svn', '\.bzr', '\.pyc', '__pycache__', '\.cache', '\.idea']
 
 "===============================================================================
 " NERDCommenter
@@ -279,13 +304,19 @@ nnoremap <leader>r :<C-u>Unite -start-insert file_rec<CR>
 nnoremap <silent> <leader>b :<C-u>Unite buffer bookmark<CR>
 
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
-nnoremap <leader>t :<C-u>Unite -no-split -buffer-name=files   -start-insert file_rec/async:!<cr>
-nnoremap <leader>f :<C-u>Unite -no-split -buffer-name=files   -start-insert file<cr>
-nnoremap <leader>r :<C-u>Unite -no-split -buffer-name=mru     -start-insert file_mru<cr>
-nnoremap <leader>o :<C-u>Unite -no-split -buffer-name=outline -start-insert outline<cr>
-nnoremap <leader>y :<C-u>Unite -no-split -buffer-name=yank    history/yank<cr>
-nnoremap <leader>e :<C-u>Unite -no-split -buffer-name=buffer  buffer<cr>
+" nnoremap <leader>t :<C-u>Unite -no-split -buffer-name=files   -start-insert file_rec/async:!<cr>
+" nnoremap <leader>f :<C-u>Unite -no-split -buffer-name=files   -start-insert file<cr>
+" nnoremap <leader>r :<C-u>Unite -no-split -buffer-name=mru     -start-insert file_mru<cr>
+" nnoremap <leader>o :<C-u>Unite -no-split -buffer-name=outline -start-insert outline<cr>
+" nnoremap <leader>y :<C-u>Unite -no-split -buffer-name=yank    history/yank<cr>
+" nnoremap <leader>e :<C-u>Unite -no-split -buffer-name=buffer  buffer<cr>
 
+" Like ctrlp.vim settings.
+call unite#custom#profile('default', 'context', {
+\   'start_insert': 1,
+\   'winheight': 10,
+\   'direction': 'botright',
+\ })
 
 " The prefix key
 " nmap    f [unite]
@@ -304,7 +335,6 @@ nnoremap <leader>e :<C-u>Unite -no-split -buffer-name=buffer  buffer<cr>
 " nnoremap <silent> [unite]me
         " \ :<C-u>Unite output:message<CR>
 " nnoremap  [unite]f  :<C-u>Unite source<CR>
-
 " For ack.
 if executable('ack-grep')
   let g:unite_source_grep_command = 'ack-grep'
@@ -331,23 +361,30 @@ let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<tab>"
 let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
-" Make UltiSnips works nicely with YCM
-function! g:UltiSnips_Complete()
-  call UltiSnips#ExpandSnippet()
-  if g:ulti_expand_res == 0
-    if pumvisible()
-      return "\<C-n>"
-    else
-      call UltiSnips#JumpForwards()
-      if g:ulti_jump_forwards_res == 0
-        return "\<TAB>"
-      endif
-    endif
-  endif
-  return ""
-endfunction
-
-au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+"===============================================================================
+" FZF
+"===============================================================================
+  let g:fzf_colors = {
+      \ 'fg':      ['fg', 'Normal'],
+      \ 'bg':      ['bg', 'Normal'],
+      \ 'hl':      ['fg', 'Comment'],
+      \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+      \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+      \ 'hl+':     ['fg', 'Statement'],
+      \ 'info':    ['fg', 'PreProc'],
+      \ 'prompt':  ['fg', 'Conditional'],
+      \ 'pointer': ['fg', 'Exception'],
+      \ 'marker':  ['fg', 'Keyword'],
+      \ 'spinner': ['fg', 'Label'],
+      \ 'header':  ['fg', 'Comment'] }
+" nnoremap <silent> <Leader>C :call fzf#run({
+" \   'source':
+" \     map(split(globpath(&rtp, "colors/*.vim"), "\n"),
+" \         "substitute(fnamemodify(v:val, ':t'), '\\..\\{-}$', '', '')"),
+" \   'sink':    'colo',
+" \   'options': '+m',
+" \   'left':    30
+" \ })<CR>
 
 " }}}
 "---------------------------------------------------------------------------
@@ -355,7 +392,6 @@ au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:U
 "
 "---------------------------------------------------------------------------
 set t_Co=256
-let g:airline_theme='onedark'
 set background=dark
 colorscheme onedark
 "}}}
@@ -369,6 +405,9 @@ colorscheme onedark
 
 " Key leader
 :let mapleader = ","
+
+" <Leader>e: Fast editing of the .vimrc
+nnoremap <Leader>e :e! ~/.vimrc<cr>
 
 "===============================================================================
 " Normal Mode Key Mappings
@@ -406,6 +445,14 @@ nnoremap <c-p> :History<CR>
 :nnoremap k gk
 :nnoremap j gj
 
+" <C-c>: Toggle comment
+nmap <C-c> <Leader>c<space>
+
+"===============================================================================
+" Normal Mode Meta/Alt Key Mappings
+"===============================================================================
+
+
 
 "===============================================================================
 " "F" Key Mappings
@@ -416,6 +463,9 @@ set pastetoggle=<F3>
 
 " Switch buffers with menu
 :nnoremap <F5> :buffers<CR>:buffer<Space>
+
+" Press F6 to toggle color column
+nnoremap <silent><F6> :call <SID>ToggleColorColumn()<cr>
 
 " maps Tagbar to F8
 map <silent> <F8> :TagbarToggle<CR>
@@ -448,8 +498,8 @@ vnoremap <c-s> :s/\%V//g<left><left><left>
 " Ctrl-f: Find highlight word with FZF
 vnoremap <c-f> "hy:Ag <c-r>h<cr>
 
-" \: Toggle comment
-xmap \ <Leader>c<space>
+" <C-c>: Toggle comment
+xmap <C-c> <Leader>c<space>
 
 "===============================================================================
 " Normal Mode Shift Key Mappings
@@ -471,22 +521,25 @@ augroup filetype_vim
 
 augroup filetype_py
     autocmd!
-    autocmd BufNewFile,BufRead *.py setlocal textwidth=79
+    " autocmd BufNewFile,BufRead *.py setlocal textwidth=79
     autocmd BufNewFile,BufRead *.py setlocal fileformat=unix
     autocmd BufNewFile,BufRead *.py setlocal colorcolumn=80
+    " Remove any trailing whitespace that is in the file
+    autocmd BufRead,BufWrite * if ! &bin | silent! %s/\s\+$//ge | endif
     autocmd FileType python setlocal foldmethod=indent
 augroup END
 
 augroup filetype_f90
     autocmd!
-    autocmd BufNewFile,BufRead *.py setlocal textwidth=129
-    autocmd BufNewFile,BufRead *.py setlocal fileformat=unix
-    autocmd BufNewFile,BufRead *.py setlocal colorcolumn=130
+    " autocmd BufNewFile,BufRead *.py setlocal textwidth=129
+    autocmd BufNewFile,BufRead *.f90 setlocal fileformat=unix
+    autocmd BufNewFile,BufRead *.f90 setlocal colorcolumn=130
 augroup END
+
 "}}}
 "--------------------------------------------------------------------------
 "  FUNCTIONS{{{
-"  
+"
 "--------------------------------------------------------------------------
 "  Convenient command to see the difference between the current buffer and the
 "  file it was loaded from, thus the changes you made.
@@ -500,5 +553,72 @@ endif
 if has("autocmd")
           au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
+
+" Make UltiSnips works nicely with YCM
+function! g:UltiSnips_Complete()
+    call UltiSnips#ExpandSnippet()
+    if g:ulti_expand_res == 0
+        if pumvisible()
+            return "\<C-n>"
+        else
+            call UltiSnips#JumpForwards()
+            if g:ulti_jump_forwards_res == 0
+                return "\<TAB>"
+            endif
+        endif
+    endif
+    return ""
+endfunction
+
+au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+
+autocmd FileType unite call s:unite_my_settings()
+function! s:unite_my_settings()"{{{
+  " Overwrite settings.
+  imap <buffer> jj      <Plug>(unite_insert_leave)
+  "imap <buffer> <C-w>     <Plug>(unite_delete_backward_path)
+
+  imap <buffer><expr> j unite#smart_map('j', '')
+  imap <buffer> <TAB>   <Plug>(unite_select_next_line)
+  imap <buffer> <C-w>     <Plug>(unite_delete_backward_path)
+  imap <buffer> '     <Plug>(unite_quick_match_default_action)
+  nmap <buffer> '     <Plug>(unite_quick_match_default_action)
+  imap <buffer><expr> x
+          \ unite#smart_map('x', "\<Plug>(unite_quick_match_jump)")
+  nmap <buffer> x     <Plug>(unite_quick_match_jump)
+  nmap <buffer> <C-z>     <Plug>(unite_toggle_transpose_window)
+  imap <buffer> <C-z>     <Plug>(unite_toggle_transpose_window)
+  nmap <buffer> <C-j>     <Plug>(unite_toggle_auto_preview)
+  nmap <buffer> <C-r>     <Plug>(unite_narrowing_input_history)
+  imap <buffer> <C-r>     <Plug>(unite_narrowing_input_history)
+  nnoremap <silent><buffer><expr> l
+          \ unite#smart_map('l', unite#do_action('default'))
+
+  let unite = unite#get_current_unite()
+  if unite.profile_name ==# 'search'
+    nnoremap <silent><buffer><expr> r     unite#do_action('replace')
+  else
+    nnoremap <silent><buffer><expr> r     unite#do_action('rename')
+  endif
+
+  nnoremap <silent><buffer><expr> cd     unite#do_action('lcd')
+  nnoremap <buffer><expr> S      unite#mappings#set_current_sorters(
+          \ empty(unite#mappings#get_current_sorters()) ?
+          \ ['sorter_reverse'] : [])
+
+  " Runs "split" action by <C-s>.
+  imap <silent><buffer><expr> <C-s>     unite#do_action('split')
+endfunction"}}}
+
+let s:color_column_old = 0
+function! s:ToggleColorColumn()
+    if s:color_column_old == 0
+        let s:color_column_old = &colorcolumn
+        windo let &colorcolumn = 0
+    else
+        windo let &colorcolumn=s:color_column_old
+        let s:color_column_old = 0
+    endif
+endfunction
 
 " }}}
