@@ -8,8 +8,15 @@
 " Show syntax highlight
 syntax on
 
-set nohidden
+" Allow changing buffer without saving it first
+set hidden
+
+" Always show the statusline
 set laststatus=2
+
+" Lower the delay of escaping out of other modes
+" keycode times out fast, mapping times out in a bit more time
+set timeout timeoutlen=1000 ttimeout ttimeoutlen=1
 
 " visual autocomplete for command menu
 set wildmenu
@@ -135,6 +142,7 @@ Plugin 'junegunn/fzf.vim'
 Plugin 'sjl/gundo.vim'
 Plugin 'raimondi/delimitmate'
 Plugin 'ConradIrwin/vim-bracketed-paste'
+
 
 call vundle#end()            " required
 
@@ -367,25 +375,31 @@ let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
   let g:fzf_colors = {
       \ 'fg':      ['fg', 'Normal'],
       \ 'bg':      ['bg', 'Normal'],
-      \ 'hl':      ['fg', 'Comment'],
-      \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+      \ 'hl':      ['fg', 'Function'],
+      \ 'fg+':     ['fg', 'PreCondit', 'CursorColumn', 'Normal'],
       \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-      \ 'hl+':     ['fg', 'Statement'],
-      \ 'info':    ['fg', 'PreProc'],
-      \ 'prompt':  ['fg', 'Conditional'],
-      \ 'pointer': ['fg', 'Exception'],
+      \ 'hl+':     ['fg', 'Type'],
+      \ 'info':    ['fg', 'String'],
+      \ 'prompt':  ['fg', 'Constant'],
+      \ 'pointer': ['fg', 'Error'],
       \ 'marker':  ['fg', 'Keyword'],
       \ 'spinner': ['fg', 'Label'],
       \ 'header':  ['fg', 'Comment'] }
-" nnoremap <silent> <Leader>C :call fzf#run({
-" \   'source':
-" \     map(split(globpath(&rtp, "colors/*.vim"), "\n"),
-" \         "substitute(fnamemodify(v:val, ':t'), '\\..\\{-}$', '', '')"),
-" \   'sink':    'colo',
-" \   'options': '+m',
-" \   'left':    30
-" \ })<CR>
 
+    " Default fzf layout
+    " - down / up / left / right
+    " - window (nvim only)
+    let g:fzf_layout = { 'down': '~40%' }
+    " [Buffers] Jump to the existing window if possible
+    let g:fzf_buffers_jump = 1
+    " [Tags] Command to generate tags file
+    let g:fzf_tags_command = 'ctags -R'
+    " Redefine :Ag command
+autocmd VimEnter * command! -nargs=* Ag
+      \ call fzf#vim#ag(<q-args>, '--color-path "33;1"', fzf#vim#default_layout)
+    " Advanced customization using autoload functions
+    autocmd VimEnter * command! Colors
+      \ call fzf#vim#colors({'left': '15%', 'options': '--reverse --margin 30%,0'})
 " }}}
 "---------------------------------------------------------------------------
 "  COLORS / THEME{{{
@@ -408,6 +422,9 @@ colorscheme onedark
 
 " <Leader>e: Fast editing of the .vimrc
 nnoremap <Leader>e :e! ~/.vimrc<cr>
+
+" <Leader>q: Quit all, very useful in vimdiff
+nnoremap <Leader>q :qa<cr>
 
 "===============================================================================
 " Normal Mode Key Mappings
@@ -458,9 +475,6 @@ nmap <C-c> <Leader>c<space>
 " "F" Key Mappings
 "===============================================================================
 
-"Set paste mode to F3
-set pastetoggle=<F3>
-
 " Switch buffers with menu
 :nnoremap <F5> :buffers<CR>:buffer<Space>
 
@@ -508,7 +522,6 @@ xmap <C-c> <Leader>c<space>
 " _ : Quick horizontal splits
  nnoremap _ :sp<cr>
 
-
 "}}}
 "--------------------------------------------------------------------------
 "   FILE TYPES{{{
@@ -523,7 +536,8 @@ augroup filetype_py
     autocmd!
     " autocmd BufNewFile,BufRead *.py setlocal textwidth=79
     autocmd BufNewFile,BufRead *.py setlocal fileformat=unix
-    autocmd BufNewFile,BufRead *.py setlocal colorcolumn=80
+    " autocmd BufNewFile,BufRead *.py setlocal colorcolumn=80
+    autocmd BufNewFile,BufRead *.py let s:color_column_old = 80
     " Remove any trailing whitespace that is in the file
     autocmd BufRead,BufWrite * if ! &bin | silent! %s/\s\+$//ge | endif
     autocmd FileType python setlocal foldmethod=indent
@@ -610,14 +624,14 @@ function! s:unite_my_settings()"{{{
   imap <silent><buffer><expr> <C-s>     unite#do_action('split')
 endfunction"}}}
 
-let s:color_column_old = 0
+" let s:color_column_old = 80
 function! s:ToggleColorColumn()
-    if s:color_column_old == 0
+    if s:color_column_old == 80
         let s:color_column_old = &colorcolumn
-        windo let &colorcolumn = 0
+        windo let &colorcolumn = 80
     else
         windo let &colorcolumn=s:color_column_old
-        let s:color_column_old = 0
+        let s:color_column_old = 80
     endif
 endfunction
 
